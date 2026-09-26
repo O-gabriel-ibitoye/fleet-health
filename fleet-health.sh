@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 #report of fleet health
 
-hostname="SkytechNebula"
-whoami="Gabriel Ibitoye"
+host=$(hostname)
+usernm=$(whoami)
+kernel=$(uname -r)
+activetm=$(uptime -p)
+cores=$(nproc)
+os=$(lsb_release -ds)
+checked=$(date '+%F %T')
 
 echo "===== fleet-health report ====="
-echo "Host:    $hostname"
-echo "User:    $whoami"
-echo "Version: $(uname -r)"
-echo "Uptime:  $(uptime -p)"
-echo "CPU's:   $(nproc)"
-echo "OS:      $(lsb_release -ds)"
-echo "Checked: $(date)"
+echo "Host:    $host"
+echo "User:    $usernm"
+echo "Kernel:  $kernel"
+echo "Uptime:  $activetm"
+echo "CPUs:    $cores"
+echo "OS:      $os"
+echo "Checked: $checked"
 echo "==============================="
+
