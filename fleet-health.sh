@@ -14,6 +14,7 @@ rootdsk=$(df -P / | awk 'NR==2 {print $5}' | tr -d "%")
 total=$(free -m | awk 'NR==2 {print $2}')
 available=$(free -m | awk 'NR==2 {print $7}')
 mem_used=$(( (total - available) * 100 / total ))
+load_pct=$(awk -v c="$cores" '{printf "%d", $1 * 100 / c}' /proc/loadavg)
 
 
 if [ "$rootdsk" -ge "$crit" ]; then
@@ -38,17 +39,28 @@ elif [ "$mem_used" -ge "$warn" ]; then
 else
   memalrt=OK
   mem_code=0
-fi 
+fi
 
 
-if [ "$disk_code" -gt "$mem_code" ]; then
-  code=$disk_code
-elif [ "$mem_code" -gt "$disk_code" ]; then
-  code=$mem_code
-elif [ "$mem_code" -eq "$disk_code" ]; then
-  code=$mem_code
+
+if [ "$load_pct" -ge "$crit" ]; then
+  loadhealth=CRIT
+  load_code=2
+elif [ "$load_pct" -ge "$warn" ]; then
+  loadhealth=WARN
+  load_code=1
 else
-  code=0
+  loadhealth=OK
+  load_code=0
+fi
+
+
+code=$disk_code
+if [ "$mem_code" -gt "$code" ]; then
+  code=$mem_code
+fi
+if [ "$load_code" -gt "$code" ]; then
+  code=$load_code
 fi
 
 
@@ -62,6 +74,7 @@ echo "OS:      $os"
 echo "Checked: $checked"
 echo "Disk /:  $rootdsk% used [$diskalrt]"
 echo "Memory:  $mem_used% used [$memalrt]"
+echo "Load:    $load_pct% of CPUs [$loadhealth]"
 echo "==============================="
 
 exit "$code"
